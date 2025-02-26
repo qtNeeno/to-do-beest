@@ -1,0 +1,12 @@
+:root {
+    background: #F3E5AB;
+}
+
+.icons:hover{
+    background-color: #e9ecef;
+    border-radius: 2rem;
+}
+
+.iconBee{
+    width: 100px;
+}
