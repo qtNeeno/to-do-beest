@@ -62,6 +62,7 @@ function App() {
 
   const reset = () => {
     setTasks([]);
+    localStorage.removeItem("tasks");
     setUserValue("");
   };
 
@@ -85,9 +86,7 @@ function App() {
   };
 
   useEffect(() => {
-    if (tasks.length > 0) {
-      localStorage.setItem("tasks", JSON.stringify(tasks));
-    }
+    localStorage.setItem("tasks", JSON.stringify(tasks));
   }, [tasks]);
 
   return (
