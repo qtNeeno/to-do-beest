@@ -14,13 +14,18 @@ import { useEffect, useState } from "react";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import EditIcon from "@mui/icons-material/Edit";
 import SaveIcon from "@mui/icons-material/Save";
-import RestartAltIcon from "@mui/icons-material/RestartAlt";
 import iconBee from "./assets/6200_8_06-Photoroom.png";
 function App() {
   const [userValue, setUserValue] = useState("");
   const [tasks, setTasks] = useState(() => {
     const savedTasks = localStorage.getItem("tasks");
-    return savedTasks ? JSON.parse(savedTasks) : [];
+    if (!savedTasks) return [];
+    const parsed = JSON.parse(savedTasks);
+
+    // compatibilità con la vecchia struttura (array di stringhe)
+    return parsed.map((t) =>
+      typeof t === "string" ? { text: t, completed: false } : t
+    );
   });
   const [editingElement, setEditingElement] = useState(null);
   const [editValue, setEditValue] = useState("");
@@ -56,7 +61,7 @@ function App() {
     e.preventDefault();
     if (userValue.trim() === "") return;
 
-    setTasks((prevTasks) => [...prevTasks, userValue]);
+    setTasks((prevTasks) => [...prevTasks, { text: userValue, completed: false }]);
     setUserValue("");
   };
 
@@ -75,14 +80,16 @@ function App() {
   const handleSaveEdit = (index) => {
     if (editValue.trim() === "") return;
     setTasks((prevTasks) =>
-      prevTasks.map((task, i) => (i === index ? editValue : task))
+      prevTasks.map((task, i) =>
+        i === index ? { ...task, text: editValue } : task
+      )
     );
     setEditingElement(null);
   };
 
   const handleEdit = (index) => {
     setEditingElement(index);
-    setEditValue(tasks[index]);
+    setEditValue(tasks[index].text);
   };
 
   useEffect(() => {
@@ -165,7 +172,22 @@ function App() {
                   <Typography>Cose da fare:</Typography>
                   {tasks.map((task, index) => (
                     <ListItem key={index} sx={{ justifyContent: "center" }}>
-                      <Checkbox></Checkbox>
+                      <Checkbox
+                        checked={task.completed}
+                        onChange={() =>
+                          setTasks((prevTasks) =>
+                            prevTasks.map((t, i) =>
+                              i === index ? { ...t, completed: !t.completed } : t
+                            )
+                          )
+                        }
+                        sx={{
+                          color: "#d2b48c",
+                          "&.Mui-checked": {
+                            color: "#d2b48c",
+                          },
+                        }}
+                      />
                       {editingElement === index ? (
                         // Input modificabile se l'elemento è in editing
                         <TextField
@@ -176,7 +198,7 @@ function App() {
                       ) : (
                         // Testo normale se l'elemento non è in editing
                         <ListItemText
-                          primary={task}
+                          primary={task.text}
                           sx={{
                             textAlign: "left",
                             wordBreak: "break-word",
